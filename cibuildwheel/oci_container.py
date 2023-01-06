@@ -19,6 +19,9 @@ from .typing import Literal, PathOrStr, PopenBytes
 
 ContainerEngine = Literal["docker", "podman"]
 
+# NOTE: custom options for OCIContainer
+CIBW_OCI_EXTAR_OPTIONS = os.environ.get("CIBW_OCI_EXTAR_OPTIONS", "")
+
 
 class OCIContainer:
     """
@@ -89,6 +92,7 @@ class OCIContainer:
                 f"--name={self.name}",
                 "--interactive",
                 "--volume=/:/host",  # ignored on CircleCI
+                "{CIBW_OCI_EXTAR_OPTIONS}",
                 *network_args,
                 self.image,
                 *shell_args,
