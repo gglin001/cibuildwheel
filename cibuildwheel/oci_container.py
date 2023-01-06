@@ -92,7 +92,7 @@ class OCIContainer:
                 f"--name={self.name}",
                 "--interactive",
                 "--volume=/:/host",  # ignored on CircleCI
-                "{CIBW_OCI_EXTAR_OPTIONS}",
+                f"{CIBW_OCI_EXTAR_OPTIONS}",
                 *network_args,
                 self.image,
                 *shell_args,
