@@ -84,6 +84,8 @@ class OCIContainer:
 
         shell_args = ["linux32", "/bin/bash"] if self.simulate_32_bit else ["/bin/bash"]
 
+        print(f"CIBW_OCI_EXTAR_OPTIONS: {CIBW_OCI_EXTAR_OPTIONS}")
+
         subprocess.run(
             [
                 self.engine,
