@@ -19,9 +19,6 @@ from .typing import Literal, PathOrStr, PopenBytes
 
 ContainerEngine = Literal["docker", "podman"]
 
-# NOTE: custom options for OCIContainer
-CIBW_OCI_EXTAR_OPTIONS = os.environ.get("CIBW_OCI_EXTAR_OPTIONS", "")
-
 
 class OCIContainer:
     """
@@ -84,22 +81,9 @@ class OCIContainer:
 
         shell_args = ["linux32", "/bin/bash"] if self.simulate_32_bit else ["/bin/bash"]
 
-        if not CIBW_OCI_EXTAR_OPTIONS:
-            subprocess.run(
-                [
-                    self.engine,
-                    "create",
-                    "--env=CIBUILDWHEEL",
-                    f"--name={self.name}",
-                    "--interactive",
-                    "--volume=/:/host",  # ignored on CircleCI
-                    *network_args,
-                    self.image,
-                    *shell_args,
-                ],
-                check=True,
-            )
-        else:
+        # NOTE: custom options for OCIContainer
+        CIBW_OCI_EXTAR_OPTIONS = os.environ.get("CIBW_OCI_EXTAR_OPTIONS", "")
+        if CIBW_OCI_EXTAR_OPTIONS:
             print(f"env CIBW_OCI_EXTAR_OPTIONS: {CIBW_OCI_EXTAR_OPTIONS}")
             CIBW_OCI_EXTAR_OPTIONS_LIST = CIBW_OCI_EXTAR_OPTIONS.split(" ")
             subprocess.run(
@@ -111,6 +95,21 @@ class OCIContainer:
                     "--interactive",
                     "--volume=/:/host",  # ignored on CircleCI
                     *CIBW_OCI_EXTAR_OPTIONS_LIST,
+                    *network_args,
+                    self.image,
+                    *shell_args,
+                ],
+                check=True,
+            )
+        else:
+            subprocess.run(
+                [
+                    self.engine,
+                    "create",
+                    "--env=CIBUILDWHEEL",
+                    f"--name={self.name}",
+                    "--interactive",
+                    "--volume=/:/host",  # ignored on CircleCI
                     *network_args,
                     self.image,
                     *shell_args,
