@@ -84,23 +84,39 @@ class OCIContainer:
 
         shell_args = ["linux32", "/bin/bash"] if self.simulate_32_bit else ["/bin/bash"]
 
-        print(f"CIBW_OCI_EXTAR_OPTIONS: {CIBW_OCI_EXTAR_OPTIONS}")
-
-        subprocess.run(
-            [
-                self.engine,
-                "create",
-                "--env=CIBUILDWHEEL",
-                f"--name={self.name}",
-                "--interactive",
-                "--volume=/:/host",  # ignored on CircleCI
-                f"{CIBW_OCI_EXTAR_OPTIONS}",
-                *network_args,
-                self.image,
-                *shell_args,
-            ],
-            check=True,
-        )
+        if not CIBW_OCI_EXTAR_OPTIONS:
+            subprocess.run(
+                [
+                    self.engine,
+                    "create",
+                    "--env=CIBUILDWHEEL",
+                    f"--name={self.name}",
+                    "--interactive",
+                    "--volume=/:/host",  # ignored on CircleCI
+                    *network_args,
+                    self.image,
+                    *shell_args,
+                ],
+                check=True,
+            )
+        else:
+            print(f"env CIBW_OCI_EXTAR_OPTIONS: {CIBW_OCI_EXTAR_OPTIONS}")
+            CIBW_OCI_EXTAR_OPTIONS_LIST = CIBW_OCI_EXTAR_OPTIONS.split(" ")
+            subprocess.run(
+                [
+                    self.engine,
+                    "create",
+                    "--env=CIBUILDWHEEL",
+                    f"--name={self.name}",
+                    "--interactive",
+                    "--volume=/:/host",  # ignored on CircleCI
+                    *CIBW_OCI_EXTAR_OPTIONS_LIST,
+                    *network_args,
+                    self.image,
+                    *shell_args,
+                ],
+                check=True,
+            )
 
         self.process = subprocess.Popen(
             [
